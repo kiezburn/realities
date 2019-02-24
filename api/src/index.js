@@ -28,7 +28,7 @@ app.use(expressJwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: 'https://theborderland.eu.auth0.com/.well-known/jwks.json',
+    jwksUri: 'https://kiezburn.eu.auth0.com/.well-known/jwks.json',
   }),
 }));
 
