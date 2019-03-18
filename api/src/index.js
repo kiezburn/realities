@@ -2,12 +2,18 @@ import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
+import { createServer as createSecureServer } from 'https';
 import { ApolloServer } from 'apollo-server-express';
 import expressJwt from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
+import { readFileSync } from 'fs';
 import neo4jDriver from './db/neo4jDriver';
 import schema from './graphql/schema';
 import startSchedulers from './services/scheduler';
+
+const privateKey = readFileSync('../certificate_key.pem', 'utf8');
+const certificate = readFileSync('../certificate.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 // Max listeners for a pub/sub
 require('events').EventEmitter.defaultMaxListeners = 15;
@@ -38,8 +44,8 @@ function getUser(user) {
     {},
     user,
     {
-      email: user['https://realities.theborderland.se/email'],
-      role: user['https://realities.theborderland.se/role'],
+      email: user['https://realities.kiezburn.org/email'],
+      role: user['https://realities.kiezburn.org/role'],
     },
   );
 }
@@ -54,6 +60,7 @@ const server = new ApolloServer({
 });
 server.applyMiddleware({ app, path: '/graphql' });
 
+const httpsServer = createSecureServer(credentials, app);
 const httpServer = createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
@@ -68,5 +75,8 @@ httpServer.listen(API_PORT, () => {
   console.log(`View GraphQL Playground at http://localhost:${API_PORT}/graphql`);
 });
 
+httpsServer.listen(8443);
+
 // Start the schedulers that download data from various APIs.
 startSchedulers();
+
