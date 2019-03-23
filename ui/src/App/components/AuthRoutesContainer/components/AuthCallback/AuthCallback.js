@@ -35,7 +35,7 @@ class AuthCallback extends Component {
           } else {
             apolloClient
               .mutate({ mutation: CREATE_VIEWER })
-              .then(() => history.replace('/profile'))
+              .then(() => history.replace('/'))
               .catch(err => console.log(err));
           }
         })
